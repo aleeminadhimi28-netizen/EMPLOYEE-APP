@@ -1,0 +1,54 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configurations and commonly used settings for
+# VS Code users. This folder should be included in source control during development.
+# .vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+__pycache__/
+build/
+flutter_*.png
+flutter_*.jpg
+flutter_*.jpeg
+pubspec.lock
+
+# Android related
+**/android/app/src/main/res/drawable-*/
+**/android/app/src/main/res/mipmap-*/
+**/android/key.properties
+**/android/local.properties
+**/android/signing-key.jks
+**/android/signing-key.password
+*.keystore
+
+# Web related
+node_modules/
+package-lock.json
+
+# Supabase related
+.env
+supabase/.temp/

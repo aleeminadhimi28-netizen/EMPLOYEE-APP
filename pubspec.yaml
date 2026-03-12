@@ -1,0 +1,50 @@
+name: project_xyz
+description: Unified Workforce Management & Attendance System.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Backend & Auth
+  supabase_flutter: ^2.6.0
+  
+  # State Management & Utilities
+  provider: ^6.1.2
+  intl: ^0.19.0
+  shared_preferences: ^2.2.3
+  
+  # Location & UI
+  geolocator: ^12.0.0
+  geocoding: ^3.0.0
+  camera: ^0.11.0
+  google_mlkit_face_detection: ^0.11.0
+  
+  # UI Components
+  lucide_icons: ^0.4.0
+  google_fonts: ^6.2.1
+  flutter_spinkit: ^5.2.1
+  flutter_animate: ^4.5.0
+  # For PDF generation (Admin requirement)
+  pdf: ^3.10.10
+  printing: ^5.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  integration_test:
+    sdk: flutter
+  mocktail: ^1.0.3
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700

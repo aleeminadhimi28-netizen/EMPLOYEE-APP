@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme.dart';
 
 class FaceRegistrationScreen extends StatefulWidget {
@@ -46,16 +48,26 @@ class _FaceRegistrationScreenState extends State<FaceRegistrationScreen> {
     setState(() => _isCapturing = true);
     try {
       final image = await _controller!.takePicture();
-      // Logic to upload 'image.path' to Supabase Storage
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Face Profile Registered Successfully!'), backgroundColor: Colors.green),
-        );
-        Navigator.pop(context);
+      final bytes = await image.readAsBytes();
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      if (userId != null) {
+        await Provider.of<AuthService>(context, listen: false).registerFace(userId, bytes);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Face Profile Registered Successfully!'), backgroundColor: Colors.green),
+          );
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       debugPrint(e.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: $e'), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       setState(() => _isCapturing = false);
     }

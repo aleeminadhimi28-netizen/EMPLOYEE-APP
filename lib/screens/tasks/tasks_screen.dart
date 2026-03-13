@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../models/task_model.dart';
 import '../../services/task_service.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -111,18 +112,39 @@ class _TasksScreenState extends State<TasksScreen> {
               task.description,
               style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
+            if (task.imageUrl != null) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  task.imageUrl!,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (task.status != 'completed')
                   TextButton.icon(
-                    onPressed: () => _service.updateTaskStatus(
-                      task.id, 
-                      task.status == 'pending' ? 'in-progress' : 'completed'
-                    ),
-                    icon: Icon(task.status == 'pending' ? LucideIcons.play : LucideIcons.checkCheck, size: 16),
-                    label: Text(task.status == 'pending' ? 'Start Task' : 'Complete'),
+                    onPressed: () async {
+                      if (task.status == 'todo') {
+                         await _service.updateTaskStatus(task.id, 'in-progress');
+                      } else {
+                        // Complete with image
+                        final picker = ImagePicker();
+                        final image = await picker.pickImage(source: ImageSource.camera);
+                        if (image != null) {
+                          final bytes = await image.readAsBytes();
+                          await _service.completeTaskWithImage(task.id, bytes);
+                        }
+                      }
+                    },
+                    icon: Icon(task.status == 'todo' ? LucideIcons.play : LucideIcons.checkCheck, size: 16),
+                    label: Text(task.status == 'todo' ? 'Start Task' : 'Submit Proof'),
                   ),
               ],
             ),

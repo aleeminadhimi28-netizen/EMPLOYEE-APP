@@ -20,20 +20,35 @@ class PayrollService {
     // 4. Insert into 'payroll' table
     
     // This is a simplified logic placeholder
-    final employees = await _supabase.from('profiles').select('id, full_name');
+    final employees = await _supabase.from('profiles').select('id, full_name, role');
     
     for (var emp in employees) {
-      // Dummy calculation logic
-      double base = 3000.0;
-      double overtime = 150.0;
-      double deductions = 50.0;
+      // 1. Fetch attendance for this employee in the specified month
+      final logs = await _supabase
+          .from('attendance')
+          .select()
+          .eq('user_id', emp['id'])
+          .gte('check_in', '$month-01')
+          .lte('check_in', '$month-31');
+
+      // 2. Calculation logic
+      double base = 3500.0; // In a real app, this would be in 'profiles.base_salary'
+      int presentDays = logs.length;
+      double overtime = 0;
+      double deductions = (22 - presentDays) * 150.0; // Simple deduction for missed days (assuming 22 work days)
+      
+      if (deductions < 0) {
+        overtime = (presentDays - 22) * 200.0; // Bonus for extra days
+        deductions = 0;
+      }
+
       double total = base + overtime - deductions;
 
       await _supabase.from('payroll').insert({
         'user_id': emp['id'],
         'month': month,
         'base_salary': base,
-        'overtime_hours': 10, // Example
+        'overtime_hours': overtime / 20.0, // Calculated back to hours for display
         'deductions': deductions,
         'total_payout': total,
         'status': 'pending',

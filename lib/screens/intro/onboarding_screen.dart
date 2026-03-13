@@ -16,22 +16,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingData> _slides = [
     OnboardingData(
-      title: 'Geofenced Security',
-      description: 'Check-in only when you are at the designated site location.',
+      title: 'Precision Locating',
+      description: 'Advanced geofencing ensures attendance is only marked at authorized work sites.',
       icon: LucideIcons.mapPin,
       color: AppTheme.primary,
     ),
     OnboardingData(
-      title: 'Biometric Trust',
-      description: 'AI-powered face matching ensures secure and honest attendance.',
-      icon: LucideIcons.shieldCheck,
-      color: AppTheme.secondary,
+      title: 'Face Verified',
+      description: 'Liveness-detection AI confirms identity with zero-friction biometrics.',
+      icon: LucideIcons.scanFace,
+      color: AppTheme.luxuryGold,
     ),
     OnboardingData(
-      title: 'Task Intelligence',
-      description: 'Manage your daily operations with real-time status tracking.',
-      icon: LucideIcons.zap,
-      color: Colors.emerald,
+      title: 'Insightful Analytics',
+      description: 'Real-time performance metrics and payroll transparency at your fingertips.',
+      icon: LucideIcons.barChart3,
+      color: AppTheme.secondary,
     ),
   ];
 
@@ -71,7 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_currentPage < _slides.length - 1) {
-                      _pageController.nextPage(duration: 500.ms, curve: Curves.easeInOut);
+                      _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
                     } else {
                       Navigator.pushReplacementNamed(context, '/login');
                     }
@@ -106,19 +106,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               shape: BoxShape.circle,
             ),
             child: Icon(slide.icon, size: 100, color: slide.color),
-          ).animate().scale(duration: 600.ms).fadeIn(),
+          ).animate().scale(duration: const Duration(milliseconds: 600)).fadeIn(),
           const SizedBox(height: 64),
           Text(
             slide.title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
+          ).animate().fadeIn(delay: const Duration(milliseconds: 300)).slideY(begin: 0.2),
           const SizedBox(height: 16),
           Text(
             slide.description,
             textAlign: TextAlign.center,
             style: const TextStyle(color: AppTheme.textSecondary, fontSize: 18),
-          ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2),
+          ).animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.2),
         ],
       ),
     );

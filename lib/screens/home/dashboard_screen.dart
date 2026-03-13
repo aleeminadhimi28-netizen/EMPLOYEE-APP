@@ -18,16 +18,20 @@ class DashboardScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(LucideIcons.bell),
             onPressed: () {},
-          ).animate().shake(delay: 1.seconds),
+          ).animate().shake(delay: const Duration(seconds: 1)),
           const SizedBox(width: 8),
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.background, Color(0xFF1E1B4B), AppTheme.background],
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.topLeft,
+            radius: 1.5,
+            colors: [
+              AppTheme.primary.withOpacity(0.15),
+              AppTheme.background,
+              AppTheme.secondary.withOpacity(0.1),
+            ],
           ),
         ),
         child: SafeArea(
@@ -43,7 +47,7 @@ class DashboardScreen extends StatelessWidget {
                 Text(
                   'Operations',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ).animate().fadeIn(delay: 400.ms).slideX(),
+                ).animate().fadeIn(delay: const Duration(milliseconds: 400)).slideX(),
                 const SizedBox(height: 16),
                 _buildGridActions(context),
                 const SizedBox(height: 32),
@@ -65,7 +69,7 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Good Morning,', style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-            Text('Commander Doe', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Associate', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ).animate().fadeIn().slideX(),
         const CircleAvatar(
@@ -80,9 +84,16 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF334155), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -102,7 +113,7 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: Colors.white.withOpacity(0.05),
               valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
             ),
-          ).animate().shimmer(duration: 2.seconds),
+          ).animate().shimmer(duration: const Duration(seconds: 2)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -114,7 +125,7 @@ class DashboardScreen extends StatelessWidget {
           )
         ],
       ),
-    ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2);
+    ).animate().fadeIn(delay: const Duration(milliseconds: 200)).slideY(begin: 0.2);
   }
 
   Widget _buildMiniStat(String value, String label) {
@@ -137,7 +148,7 @@ class DashboardScreen extends StatelessWidget {
       children: [
         _buildGlassAction(context, 'Attendance', LucideIcons.mapPin, AppTheme.primary, '/attendance'),
         _buildGlassAction(context, 'Task Hub', LucideIcons.layoutGrid, AppTheme.secondary, '/tasks'),
-        _buildGlassAction(context, 'Payroll', LucideIcons.banknote, Colors.emerald, '/payroll'),
+        _buildGlassAction(context, 'Payroll', LucideIcons.banknote, AppTheme.accent, '/payroll'),
         _buildGlassAction(context, 'Admin', LucideIcons.shield, Colors.amber, '/admin'),
       ],
     );
@@ -165,7 +176,7 @@ class DashboardScreen extends StatelessWidget {
           ],
         ),
       ),
-    ).animate().scale(delay: 500.ms);
+    ).animate().scale(delay: const Duration(milliseconds: 500));
   }
 
   Widget _buildRecentActivity(BuildContext context) {
@@ -202,7 +213,7 @@ class DashboardScreen extends StatelessWidget {
               trailing: const Text('08:45 AM', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
             ),
           ),
-        ).animate().fadeIn(delay: 800.ms),
+        ).animate().fadeIn(delay: const Duration(milliseconds: 800)),
       ],
     );
   }
@@ -230,6 +241,6 @@ class DashboardScreen extends StatelessWidget {
           IconButton(icon: const Icon(LucideIcons.settings, color: AppTheme.textSecondary), onPressed: () {}),
         ],
       ),
-    ).animate().slideY(begin: 1, delay: 1.seconds);
+    ).animate().slideY(begin: 1, delay: const Duration(seconds: 1));
   }
 }

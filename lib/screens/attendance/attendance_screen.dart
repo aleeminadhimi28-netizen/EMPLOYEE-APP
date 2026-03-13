@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme.dart';
 import '../../services/attendance_service.dart';
+import '../../services/auth_service.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -13,23 +17,54 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final _service = AttendanceService();
+  CameraController? _cameraController;
+  Map<String, dynamic>? _selectedSite;
   bool _isWithinRadius = false;
   bool _isLoading = true;
+  bool _isVerifying = false;
 
   @override
   void initState() {
     super.initState();
     _checkStatus();
+    _initCamera();
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initCamera() async {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) return;
+    final front = cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.front);
+    _cameraController = CameraController(front, ResolutionPreset.medium, enableAudio: false);
+    await _cameraController!.initialize();
+    if (mounted) setState(() {});
   }
 
   Future<void> _checkStatus() async {
     setState(() => _isLoading = true);
-    await Future.delayed(1500.ms); // Add a premium delay feel
     try {
       final pos = await _service.getCurrentLocation();
-      final within = _service.isWithinRadius(pos);
+      final sites = await _service.getAvailableSites();
+      
+      Map<String, dynamic>? nearestSite;
+      bool found = false;
+
+      for (var site in sites) {
+        if (_service.isWithinSite(pos, site)) {
+          nearestSite = site;
+          found = true;
+          break;
+        }
+      }
+
       setState(() {
-        _isWithinRadius = within;
+        _selectedSite = nearestSite;
+        _isWithinRadius = found;
         _isLoading = false;
       });
     } catch (e) {
@@ -47,7 +82,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       ),
       body: Stack(
         children: [
-          // Background Glow
           Positioned(
             top: -100,
             right: -100,
@@ -87,16 +121,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: _isWithinRadius ? Colors.emerald.withOpacity(0.3) : Colors.redAccent.withOpacity(0.3),
+          color: _isWithinRadius ? const Color(0xFF10B981).withOpacity(0.3) : Colors.redAccent.withOpacity(0.3),
         ),
       ),
       child: Row(
         children: [
           Icon(
             _isWithinRadius ? LucideIcons.mapPin : LucideIcons.mapPinOff,
-            color: _isWithinRadius ? Colors.emerald : Colors.redAccent,
+            color: _isWithinRadius ? const Color(0xFF10B981) : Colors.redAccent,
           ).animate(onPlay: (controller) => controller.repeat())
-           .shimmer(duration: 2.seconds),
+           .shimmer(duration: const Duration(seconds: 2)),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +140,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                _isWithinRadius ? 'Downtown Business Hub' : 'Please wait for lock',
+                _isWithinRadius ? (_selectedSite?['name'] ?? 'Authorized Site') : 'Please enter authorized zone',
                 style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
             ],
@@ -124,7 +158,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer Pulse
           Container(
             width: 260,
             height: 260,
@@ -133,21 +166,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               border: Border.all(color: AppTheme.primary.withOpacity(0.1), width: 2),
             ),
           ).animate(onPlay: (controller) => controller.repeat())
-           .scale(begin: 0.8, end: 1.2, duration: 2.seconds)
+           .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: const Duration(seconds: 2))
            .fadeOut(),
           
-          // Outer Ring
-          Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.primary.withOpacity(0.3), width: 2),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat())
-           .rotate(duration: 10.seconds),
-
-          // Core Scanner
           Container(
             width: 180,
             height: 180,
@@ -162,10 +183,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 )
               ],
             ),
-            child: const Icon(LucideIcons.user, size: 80, color: AppTheme.textSecondary),
-          ),
+            child: ClipOval(
+              child: _cameraController != null && _cameraController!.value.isInitialized
+                  ? CameraPreview(_cameraController!)
+                  : const Icon(LucideIcons.user, size: 80, color: AppTheme.textSecondary),
+            ),
+          ).animate(onPlay: (controller) => controller.repeat())
+           .rotate(duration: const Duration(seconds: 10)),
 
-          // Scan Line
           Positioned(
             top: 40,
             child: Container(
@@ -178,9 +203,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ],
               ),
             ).animate(onPlay: (controller) => controller.repeat())
-             .moveY(begin: 0, end: 100, duration: 1.5.seconds, curve: Curves.easeInOut)
+             .moveY(begin: 0, end: 100, duration: const Duration(milliseconds: 1500), curve: Curves.easeInOut)
              .then()
-             .moveY(begin: 100, end: 0, duration: 1.5.seconds, curve: Curves.easeInOut),
+             .moveY(begin: 100, end: 0, duration: const Duration(milliseconds: 1500), curve: Curves.easeInOut),
           ),
         ],
       ),
@@ -193,20 +218,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Text(
           'Identity Scan Required',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ).animate().fadeIn(delay: 300.ms),
+        ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
         const SizedBox(height: 8),
         const Text(
           'Ensure your face is clearly visible\nin the center of the frame.',
           textAlign: TextAlign.center,
           style: TextStyle(color: AppTheme.textSecondary),
-        ).animate().fadeIn(delay: 500.ms),
+        ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
       ],
     );
   }
 
   Widget _buildActionButton() {
     return ElevatedButton(
-      onPressed: _isWithinRadius ? () {} : null,
+      onPressed: (_isWithinRadius && !_isVerifying && _cameraController != null && _cameraController!.value.isInitialized)
+          ? _performVerification
+          : null,
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 64),
         backgroundColor: AppTheme.primary,
@@ -214,14 +241,52 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         elevation: 10,
         shadowColor: AppTheme.primary.withOpacity(0.4),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.shieldCheck),
-          SizedBox(width: 12),
-          Text('Initiate Biometric Match', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          _isVerifying 
+            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : const Icon(LucideIcons.shieldCheck),
+          const SizedBox(width: 12),
+          Text(_isVerifying ? 'Verifying Identity...' : 'Initiate Biometric Match', 
+               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
-    ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2);
+    ).animate().fadeIn(delay: const Duration(milliseconds: 800)).slideY(begin: 0.2);
+  }
+
+  Future<void> _performVerification() async {
+    setState(() => _isVerifying = true);
+    try {
+      final image = await _cameraController!.takePicture();
+      final bytes = await image.readAsBytes();
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      if (userId == null) throw 'User not logged in';
+
+      final success = await Provider.of<AuthService>(context, listen: false).verifyFace(userId, bytes);
+
+      if (mounted) {
+        if (success) {
+          await _service.clockIn(userId, _selectedSite!['id']);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Attendance Marked Successfully!'), backgroundColor: Colors.green),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Face Verification Failed. Try again.'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isVerifying = false);
+    }
   }
 }

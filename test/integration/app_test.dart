@@ -13,18 +13,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check for first slide
-      expect(find.text('Geofenced Security'), findsOneWidget);
+      expect(find.text('Precision Locating'), findsOneWidget);
 
       // Tap next 3 times to get through onboarding
       final nextButton = find.byType(ElevatedButton);
       
       await tester.tap(nextButton);
       await tester.pumpAndSettle();
-      expect(find.text('Biometric Trust'), findsOneWidget);
+      expect(find.text('Face Verified'), findsOneWidget);
 
       await tester.tap(nextButton);
       await tester.pumpAndSettle();
-      expect(find.text('Task Intelligence'), findsOneWidget);
+      expect(find.text('Insightful Analytics'), findsOneWidget);
 
       // This tap should take us to Login
       await tester.tap(nextButton);

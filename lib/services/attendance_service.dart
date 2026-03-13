@@ -2,13 +2,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AttendanceService {
-  final _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase;
 
-  // Office Location (Site)
-  // These would typically come from the database per user/site
-  static const double officeLat = 40.7128; // Example
-  static const double officeLng = -74.0060; // Example
-  static const double allowedRadius = 100.0; // Meters
+  AttendanceService({SupabaseClient? client}) 
+      : _supabase = client ?? Supabase.instance.client;
+
+  Future<List<Map<String, dynamic>>> getAvailableSites() async {
+    final response = await _supabase.from('work_sites').select();
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  bool isWithinSite(Position currentPosition, Map<String, dynamic> site) {
+    double distanceInMeters = Geolocator.distanceBetween(
+      currentPosition.latitude,
+      currentPosition.longitude,
+      site['latitude'],
+      site['longitude'],
+    );
+    return distanceInMeters <= (site['radius_meters'] ?? 100.0);
+  }
 
   Future<Position> getCurrentLocation() async {
     bool serviceEnabled;
@@ -30,22 +42,13 @@ class AttendanceService {
     return await Geolocator.getCurrentPosition();
   }
 
-  bool isWithinRadius(Position currentPosition) {
-    double distanceInMeters = Geolocator.distanceBetween(
-      currentPosition.latitude,
-      currentPosition.longitude,
-      officeLat,
-      officeLng,
-    );
-    return distanceInMeters <= allowedRadius;
-  }
-
-  Future<void> clockIn(String userId, String faceVerificationId) async {
+  Future<void> clockIn(String userId, int siteId) async {
     await _supabase.from('attendance').insert({
       'user_id': userId,
+      'work_site_id': siteId,
       'check_in': DateTime.now().toIso8601String(),
       'status': 'present',
-      'verified_via_face': true,
+      'verified_via_face': true, // Assuming face was verified in UI
       'verified_via_gps': true,
     });
   }

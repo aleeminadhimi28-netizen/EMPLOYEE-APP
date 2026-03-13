@@ -16,15 +16,17 @@ dependencies:
   provider: ^6.1.2
   intl: ^0.19.0
   shared_preferences: ^2.2.3
+  flutter_dotenv: ^5.1.0
   
   # Location & UI
   geolocator: ^12.0.0
   geocoding: ^3.0.0
   camera: ^0.11.0
+  image_picker: ^1.1.2
   google_mlkit_face_detection: ^0.11.0
   
   # UI Components
-  lucide_icons: ^0.4.0
+  lucide_icons: ^0.257.0
   google_fonts: ^6.2.1
   flutter_spinkit: ^5.2.1
   flutter_animate: ^4.5.0
@@ -42,9 +44,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  fonts:
-    - family: Outfit
-      fonts:
-        - asset: assets/fonts/Outfit-Regular.ttf
-        - asset: assets/fonts/Outfit-Bold.ttf
-          weight: 700
+  assets:
+    - .env
+    - assets/images/
+    - assets/fonts/

@@ -48,8 +48,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Future<void> _checkStatus() async {
     setState(() => _isLoading = true);
     try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final companyId = authService.currentCompany?['id'];
+      
+      if (companyId == null) throw 'Company information not found';
+
       final pos = await _service.getCurrentLocation();
-      final sites = await _service.getAvailableSites();
+      final sites = await _service.getAvailableSites(companyId);
       
       Map<String, dynamic>? nearestSite;
       bool found = false;

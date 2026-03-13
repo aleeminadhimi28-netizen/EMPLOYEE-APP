@@ -4,9 +4,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService with ChangeNotifier {
   SupabaseClient get _supabase => Supabase.instance.client;
+  
+  AuthService() {
+    _fetchInitialProfile();
+  }
+
   bool _isLoading = false;
+  Map<String, dynamic>? _currentCompany;
+  Map<String, dynamic>? _currentUserProfile;
 
   bool get isLoading => _isLoading;
+  Map<String, dynamic>? get currentCompany => _currentCompany;
+  Map<String, dynamic>? get currentUserProfile => _currentUserProfile;
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -16,7 +25,19 @@ class AuthService with ChangeNotifier {
   Future<void> signIn(String email, String password) async {
     _setLoading(true);
     try {
-      await _supabase.auth.signInWithPassword(email: email, password: password);
+      final response = await _supabase.auth.signInWithPassword(email: email, password: password);
+      
+      // Fetch user profile and company info
+      if (response.user != null) {
+        final profile = await _supabase
+            .from('profiles')
+            .select('*, companies(*)')
+            .eq('id', response.user!.id)
+            .single();
+        _currentUserProfile = profile;
+        _currentCompany = profile['companies'];
+        notifyListeners();
+      }
     } catch (e) {
       rethrow;
     } finally {
@@ -59,6 +80,24 @@ class AuthService with ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  Future<void> _fetchInitialProfile() async {
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      try {
+        final profile = await _supabase
+            .from('profiles')
+            .select('*, companies(*)')
+            .eq('id', user.id)
+            .single();
+        _currentUserProfile = profile;
+        _currentCompany = profile['companies'];
+        notifyListeners();
+      } catch (e) {
+        debugPrint('Error fetching initial profile: $e');
+      }
     }
   }
 }

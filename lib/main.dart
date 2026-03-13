@@ -14,6 +14,8 @@ import 'screens/auth/face_registration_screen.dart';
 import 'screens/payroll/payroll_screen.dart';
 import 'screens/admin/analytics_dashboard.dart';
 import 'services/auth_service.dart';
+import 'screens/admin/setup_company_screen.dart';
+import 'screens/admin/super_admin_portal.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +63,7 @@ class ProjectXYZ extends StatelessWidget {
       title: 'Project XYZ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: '/splash',
+      home: const AuthWrapper(),
       routes: {
         '/splash': (context) => SplashScreen(initError: initError),
         '/onboarding': (context) => const OnboardingScreen(),
@@ -73,6 +75,8 @@ class ProjectXYZ extends StatelessWidget {
         '/register-face': (context) => const FaceRegistrationScreen(),
         '/payroll': (context) => const PayrollScreen(),
         '/analytics': (context) => const AnalyticsDashboard(),
+        '/setup-company': (context) => const SetupCompanyScreen(),
+        '/super-admin': (context) => const SuperAdminPortal(),
       },
     );
   }
@@ -83,12 +87,24 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     final session = Supabase.instance.client.auth.currentSession;
     
-    if (session != null) {
-      return const DashboardScreen();
-    } else {
+    if (session == null) {
       return const LoginScreen();
     }
+
+    // Role-based Routing
+    final userRole = authService.currentUserProfile?['role'];
+
+    if (userRole == 'super_admin') {
+      return const SuperAdminPortal();
+    }
+
+    if (authService.currentCompany == null) {
+      return const SetupCompanyScreen();
+    }
+
+    return const DashboardScreen();
   }
 }

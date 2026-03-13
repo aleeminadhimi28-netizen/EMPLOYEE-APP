@@ -8,8 +8,8 @@ class AttendanceService {
   AttendanceService({SupabaseClient? client}) 
       : _providedClient = client;
 
-  Future<List<Map<String, dynamic>>> getAvailableSites() async {
-    final response = await _supabase.from('work_sites').select();
+  Future<List<Map<String, dynamic>>> getAvailableSites(int companyId) async {
+    final response = await _supabase.from('work_sites').select().eq('company_id', companyId);
     return List<Map<String, dynamic>>.from(response);
   }
 

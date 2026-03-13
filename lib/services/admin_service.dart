@@ -4,9 +4,20 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class AdminService {
-  final _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
+
+  Future<List<Map<String, dynamic>>> getCompanyAttendance(int companyId) async {
+    final response = await _supabase
+        .from('attendance')
+        .select('*, profiles(full_name, email)')
+        .eq('company_id', companyId)
+        .order('check_in', ascending: false);
+    return List<Map<String, dynamic>>.from(response);
+  }
 
   Future<List<Map<String, dynamic>>> getAllAttendance() async {
+    // Note: In multi-tenant, we usually want to filter by company. 
+    // This is kept for cases where a super-admin might need all data.
     final response = await _supabase
         .from('attendance')
         .select('*, profiles(full_name, email)')

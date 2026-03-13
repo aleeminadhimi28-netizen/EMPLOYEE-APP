@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme.dart';
+import '../../services/auth_service.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,7 +13,10 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Project XYZ', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -1)),
+        title: Text(
+          Provider.of<AuthService>(context).currentCompany?['name'] ?? 'Project XYZ',
+          style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: -1),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [

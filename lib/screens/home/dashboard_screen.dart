@@ -74,7 +74,10 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Good Morning,', style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-            Text('Associate', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              Provider.of<AuthService>(context).currentUserProfile?['full_name'] ?? 'Associate',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
           ],
         ).animate().fadeIn().slideX(),
         const CircleAvatar(

@@ -240,7 +240,18 @@ class _LoginScreenState extends State<LoginScreen> {
       child: ElevatedButton(
         onPressed: authService.isLoading
             ? null
-            : () => authService.signIn(_emailController.text, _passwordController.text),
+            : () async {
+                try {
+                  await authService.signIn(_emailController.text, _passwordController.text);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,

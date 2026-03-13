@@ -18,26 +18,42 @@ import 'services/auth_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  String? initError;
 
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  );
+  try {
+    // Load environment variables
+    await dotenv.load(fileName: ".env");
+
+    final url = dotenv.env['SUPABASE_URL'];
+    final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    if (url != null && url.isNotEmpty && url != 'YOUR_SUPABASE_URL' &&
+        anonKey != null && anonKey.isNotEmpty && anonKey != 'YOUR_SUPABASE_ANON_KEY') {
+      await Supabase.initialize(
+        url: url,
+        anonKey: anonKey,
+      );
+    } else {
+      initError = "Supabase configuration missing or placeholder values used in .env";
+    }
+  } catch (e) {
+    debugPrint("Initialization error: $e");
+    initError = e.toString();
+  }
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
       ],
-      child: const ProjectXYZ(),
+      child: ProjectXYZ(initError: initError),
     ),
   );
 }
 
 class ProjectXYZ extends StatelessWidget {
-  const ProjectXYZ({super.key});
+  final String? initError;
+  const ProjectXYZ({super.key, this.initError});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +63,7 @@ class ProjectXYZ extends StatelessWidget {
       theme: AppTheme.darkTheme,
       initialRoute: '/splash',
       routes: {
-        '/splash': (context) => const SplashScreen(),
+        '/splash': (context) => SplashScreen(initError: initError),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),

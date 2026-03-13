@@ -3,7 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final String? initError;
+  const SplashScreen({super.key, this.initError});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -19,6 +20,12 @@ class _SplashScreenState extends State<SplashScreen> {
   _navigateToNext() async {
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
+    
+    if (widget.initError != null) {
+      // Stay on splash to show error
+      return;
+    }
+    
     Navigator.pushReplacementNamed(context, '/onboarding');
   }
 
@@ -95,17 +102,36 @@ class _SplashScreenState extends State<SplashScreen> {
           // Loading Indicator at bottom
           Positioned(
             bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: SizedBox(
-                width: 40,
-                height: 2,
-                child: LinearProgressIndicator(
-                  backgroundColor: Colors.white.withOpacity(0.1),
-                  color: AppTheme.primary,
-                ),
-              ),
+            left: 24,
+            right: 24,
+            child: Column(
+              children: [
+                if (widget.initError != null) ...[
+                  Text(
+                    'Setup Error',
+                    style: TextStyle(color: Colors.red.shade400, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.initError!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => Navigator.pushReplacementNamed(context, '/onboarding'),
+                    child: const Text('Continue anyway (Offline Mode)', style: TextStyle(color: AppTheme.primary)),
+                  ),
+                ] else
+                  SizedBox(
+                    width: 40,
+                    height: 2,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.white.withOpacity(0.1),
+                      color: AppTheme.primary,
+                    ),
+                  ),
+              ],
             ),
           ).animate().fadeIn(delay: 1.seconds),
         ],

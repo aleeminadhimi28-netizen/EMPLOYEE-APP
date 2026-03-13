@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import '../models/task_model.dart';
 
 class TaskService {
-  final _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   Stream<List<Task>> getAssignedTasks(String userId) {
     return _supabase

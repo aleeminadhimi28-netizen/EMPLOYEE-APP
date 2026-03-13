@@ -2,10 +2,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AttendanceService {
-  final SupabaseClient _supabase;
+  final SupabaseClient? _providedClient;
+  SupabaseClient get _supabase => _providedClient ?? Supabase.instance.client;
 
   AttendanceService({SupabaseClient? client}) 
-      : _supabase = client ?? Supabase.instance.client;
+      : _providedClient = client;
 
   Future<List<Map<String, dynamic>>> getAvailableSites() async {
     final response = await _supabase.from('work_sites').select();

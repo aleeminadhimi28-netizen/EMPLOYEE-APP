@@ -37,8 +37,6 @@ flutter_*.jpeg
 pubspec.lock
 
 # Android related
-**/android/app/src/main/res/drawable-*/
-**/android/app/src/main/res/mipmap-*/
 **/android/key.properties
 **/android/local.properties
 **/android/signing-key.jks

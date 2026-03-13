@@ -31,8 +31,11 @@ jobs:
       - name: Create .env file
         run: touch .env
 
+      - name: Flutter Clean
+        run: flutter clean
+
       - name: Build Release APK
-        run: flutter build apk --release --no-pub
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

@@ -48,5 +48,5 @@ node_modules/
 package-lock.json
 
 # Supabase related
-.env
+# .env
 supabase/.temp/
